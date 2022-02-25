@@ -1,4 +1,5 @@
 import graphene
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -223,20 +224,29 @@ def PagesQuery():
     registry.pages[type(WagtailPage)] = Page
 
     class Mixin:
-        pages = QuerySetList(
-            graphene.NonNull(lambda: PageInterface),
-            content_type=graphene.Argument(
+        pages_kwargs = {
+            "content_type": graphene.Argument(
                 graphene.String,
                 description=_("Filter by content type. Uses the `app.Model` notation."),
             ),
-            in_site=graphene.Argument(
+            "in_site": graphene.Argument(
                 graphene.Boolean,
                 description=_("Filter to pages in the current site only."),
                 default_value=False,
             ),
-            enable_search=True,
-            required=True,
-        )
+            "enable_search": True,
+            "required": True,
+        }
+        if getattr(settings, "WAGTAIL_I18N_ENABLED", False):
+            pages_kwargs["language_code"] = graphene.Argument(
+                graphene.String,
+                description=_(
+                    "Filter to pages with the given language code as defined in `WAGTAIL_CONTENT_LANGUAGES`."
+                ),
+            )
+
+        pages = QuerySetList(graphene.NonNull(lambda: PageInterface), **pages_kwargs)
+
         page = graphene.Field(
             PageInterface,
             id=graphene.Int(),
@@ -288,6 +298,10 @@ def PagesQuery():
                     )  # something not quite right here, bail out early
                 else:
                     pages = pages.filter(content_type=ctype)
+
+            language_code = kwargs.pop("language_code", "")
+            if language_code and getattr(settings, "WAGTAIL_I18N_ENABLED", False):
+                pages = pages.filter(locale__language_code=language_code)
 
             return resolve_queryset(pages, info, **kwargs)
 

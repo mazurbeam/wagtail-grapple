@@ -180,6 +180,8 @@ HEADLESS_PREVIEW_LIVE = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
+WAGTAIL_I18N_ENABLED = True
+
 try:
     import channels
 
