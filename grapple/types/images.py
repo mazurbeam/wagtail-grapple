@@ -75,7 +75,7 @@ class ImageRenditionObjectType(DjangoObjectType, BaseImageObjectType):
     def resolve_image(self, info, **kwargs):
         return self.image
 
-    def resolve_focal_point(self):
+    def resolve_focal_point(self, info, **kwargs):
         return self.focal_point.__dict__
 
 
