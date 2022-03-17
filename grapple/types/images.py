@@ -76,7 +76,10 @@ class ImageRenditionObjectType(DjangoObjectType, BaseImageObjectType):
         return self.image
 
     def resolve_focal_point(self, info, **kwargs):
-        return self.focal_point.__dict__
+        if self.focal_point:
+            return self.focal_point.__dict__
+        else:
+            return {'top': None, 'left': None, 'right': None, 'bottom': None}
 
 
 def get_rendition_type():
