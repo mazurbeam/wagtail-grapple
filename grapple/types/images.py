@@ -60,7 +60,15 @@ class BaseImageObjectType(graphene.ObjectType):
         return self.tags.all()
 
 
+class RenditionFocalPoint(graphene.ObjectType):
+    left = graphene.Float()
+    right = graphene.Float()
+    top = graphene.Float()
+    bottom = graphene.Float()
+
+
 class ImageRenditionObjectType(DjangoObjectType, BaseImageObjectType):
+    focal_point = graphene.Field(lambda: RenditionFocalPoint, required=True)
     class Meta:
         model = WagtailImageRendition
 
